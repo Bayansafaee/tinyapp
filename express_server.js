@@ -4,7 +4,7 @@ const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 
-generateRandomString = () => {
+const generateRandomString = () => {
   return Math.random().toString(36).slice(2).substring(0,6);
 };
 
