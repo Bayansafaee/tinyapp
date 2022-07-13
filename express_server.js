@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+app.use(express.urlencoded({ extended: true }));
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -18,6 +20,11 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+// Render a new website URL and displays it with the urls_new template
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 // Displays short URL and long URL
