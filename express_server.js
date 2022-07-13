@@ -41,10 +41,17 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+// Generates 6 digit string that is added to database and redirected to urls/:id
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
+});
+
+// delete entry from database
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
 });
 
 app.get("/u/:id", (req, res) => {
