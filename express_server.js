@@ -2,14 +2,18 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
-app.use(express.urlencoded({ extended: true }));
-
 app.set("view engine", "ejs");
+
+generateRandomString = () => {
+  return Math.random().toString(36).slice(2).substring(0,6);
+}
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+app.use(express.urlencoded({ extended: true }));
 
 // ROUTING
 app.get("/", (req, res) => {
