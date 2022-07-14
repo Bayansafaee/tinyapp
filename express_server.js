@@ -41,6 +41,18 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+// delete entry from database
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+});
+
+app.post("/urls/:id/", (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect("/urls");
+});
+
+
 // Generates 6 digit string that is added to database and redirected to urls/:id
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
@@ -48,11 +60,6 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// delete entry from database
-app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
-});
 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
