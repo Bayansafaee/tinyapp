@@ -1,5 +1,5 @@
 const express = require("express");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -20,7 +20,7 @@ const urlDatabase = {
 };
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
+app.use(cookieParser());
 
 // ROUTING
 app.get("/", (req, res) => {
@@ -32,24 +32,24 @@ app.get('/register', (req, res) => {
   let templateVars = {
     id: userDatabase[req.cookies['id']]
   };
-  res.render('register', templateVars)
-})
+  res.render('register', templateVars);
+});
 
 // Displays our urls from the urlDatabase by using the urls_index template
 app.get("/urls", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
     id: userDatabase[req.cookies['id']],
-   };
+  };
   res.render("urls_index", templateVars);
 });
 
 // Render a new website URL and displays it with the urls_new template
 app.get("/urls/new", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
     user: userDatabase[req.cookies["user"]]
-   };
+  };
   res.render("urls_new", templateVars);
 });
 
@@ -59,7 +59,7 @@ app.get("/urls/:id", (req, res) => {
     URLid: req.params.id,
     longURL: urlDatabase[req.params.id],
     id: userDatabase[req.cookies['id']]
-   };
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -73,7 +73,7 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     id: userDatabase[req.cookies['id']],
     urls: urlDatabase
   };
@@ -109,20 +109,41 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
-// User Log out 
+// User Log out
 app.post('/logout', (req, res) => {
   res.clearCookie('id');
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
+
+// user lookup helper function
+const getUserByEmail = (email) => {
+  for (const id in userDatabase) {
+    if (userDatabase[id].email === email) {
+      return true;
+    }
+  }
+  return null;
+};
 
 // Registration form data handler
 app.post('/register', (req, res) => {
-  let user_ID = String(generateRandomString());
-    userDatabase[String(user_ID)] = {'id': user_ID, 'email': req.body.email, 'password': req.body.password};
-    res.cookie('id', user_ID);
+  if (req.body.email === '' || req.body.password === '') {
+    res.clearCookie('email');
+    res.sendStatus(406);
+  }  else if (getUserByEmail(req.body.email)) {
+    res.statusCode = 400;
+    res.send('Email is already registered');
+  } else {
+    let userID = String(generateRandomString());
+    userDatabase[String(userID)] = {
+      id: userID,
+      email: req.body.email,
+      password: req.body.password};
+    res.cookie('id', userID);
     res.redirect("/urls");
     console.log(userDatabase);
-})
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
