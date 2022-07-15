@@ -22,6 +22,14 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// registration page
+app.get('/register', (req, res) => {
+  let templateVars = {
+    username: req.cookies['username']
+  };
+  res.render('urls_register', templateVars)
+})
+
 // Displays our urls from the urlDatabase by using the urls_index template
 app.get("/urls", (req, res) => {
   const templateVars = { 
