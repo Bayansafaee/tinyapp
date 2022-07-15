@@ -42,10 +42,11 @@ app.get("/urls/new", (req, res) => {
 
 // Displays short URL and long URL
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { 
-    id: req.params.id, 
-    longURL: urlDatabase[req.params.id]};
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
     username: req.cookies["username"],
+   };
   res.render("urls_show", templateVars);
 });
 
@@ -87,7 +88,7 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
-// User Logout
+// User Log out 
 app.post('/logout', (req, res) => {
   res.clearCookie('username')
   res.redirect('/urls')
