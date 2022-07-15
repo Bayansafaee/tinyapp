@@ -80,6 +80,7 @@ app.get('/login', (req, res) => {
   res.render("login", templateVars);
 });
 
+
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
@@ -130,7 +131,7 @@ app.post('/register', (req, res) => {
   if (req.body.email === '' || req.body.password === '') {
     res.clearCookie('email');
     res.sendStatus(406);
-  }  else if (getUserByEmail(req.body.email)) {
+  }  else if (getUserByEmail(email)) {
     res.statusCode = 400;
     res.send('Email is already registered');
   } else {
