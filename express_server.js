@@ -29,10 +29,18 @@ app.get("/", (req, res) => {
 
 // registration page
 app.get('/register', (req, res) => {
-  let templateVars = {
+  const templateVars = {
     id: userDatabase[req.cookies['id']]
   };
   res.render('register', templateVars);
+});
+
+app.get('/login', (req, res) => {
+  const templateVars = {
+    id: userDatabase[req.cookies['id']],
+    urls: urlDatabase
+  };
+  res.render("login", templateVars);
 });
 
 // Displays our urls from the urlDatabase by using the urls_index template
@@ -48,7 +56,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    user: userDatabase[req.cookies["user"]]
+    id: userDatabase[req.cookies["id"]]
   };
   res.render("urls_new", templateVars);
 });
@@ -72,18 +80,17 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-app.get('/login', (req, res) => {
-  const templateVars = {
-    id: userDatabase[req.cookies['id']],
-    urls: urlDatabase
-  };
-  res.render("login", templateVars);
-});
-
-
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
+// Generates 6 digit string that is added to database and redirected to urls/:id
+app.post("/urls", (req, res) => {
+  let shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
+});
+
 
 // delete entry from database
 app.post("/urls/:id/delete", (req, res) => {
@@ -97,12 +104,6 @@ app.post("/urls/:id/", (req, res) => {
   res.redirect("/urls");
 });
 
-// Generates 6 digit string that is added to database and redirected to urls/:id
-app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`);
-});
 
 // User login functionality
 app.post("/login", (req, res) => {
@@ -131,7 +132,7 @@ app.post('/register', (req, res) => {
   if (req.body.email === '' || req.body.password === '') {
     res.clearCookie('email');
     res.sendStatus(406);
-  }  else if (getUserByEmail(email)) {
+  } else if (getUserByEmail(email)) {
     res.statusCode = 400;
     res.send('Email is already registered');
   } else {
