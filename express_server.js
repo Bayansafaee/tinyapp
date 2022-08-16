@@ -39,6 +39,9 @@ app.get("/", (req, res) => {
 
 // registration page
 app.get('/register', (req, res) => {
+  if (req.cookies['id']) {
+    return res.redirect('/urls');
+  }
   const templateVars = {
     id: userDatabase[req.cookies['id']]
   };
@@ -46,6 +49,9 @@ app.get('/register', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+  if (req.cookies['id']) {
+    return res.redirect('/urls');
+  }
   const templateVars = {
     id: userDatabase[req.cookies['id']],
     urls: urlDatabase
@@ -64,11 +70,15 @@ app.get("/urls", (req, res) => {
 
 // Render a new website URL and displays it with the urls_new template
 app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    id: userDatabase[req.cookies["id"]]
-  };
-  res.render("urls_new", templateVars);
+  if (req.cookies['user_id']) {
+    const templateVars = {
+      urls: urlDatabase,
+      id: userDatabase[req.cookies["id"]]
+    };
+    res.render("urls_new", templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 // Displays short URL and long URL
@@ -129,7 +139,7 @@ app.post("/login", (req, res) => {
       res.sendStatus(406);
     }
   }
-  });
+});
 
 // User Log out
 app.post('/logout', (req, res) => {
@@ -147,8 +157,7 @@ app.post("/register", (req, res) => {
     if (req.body.email === '' || req.body.password === '') {
       res.clearCookie('email');
       res.sendStatus(400);
-    } 
-    else {
+    } else {
       let userID = String(generateRandomString());
       userDatabase[String(userID)] = {
         id: userID,
