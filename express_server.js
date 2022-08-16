@@ -22,6 +22,16 @@ const urlDatabase = {
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// user lookup helper function
+const getUserByEmail = (email) => {
+  for (const id in userDatabase) {
+    if (userDatabase[id].email === email) {
+      return userDatabase[id];
+    }
+  }
+  return null;
+};
+
 // ROUTING
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -107,9 +117,19 @@ app.post("/urls/:id/", (req, res) => {
 
 // User login functionality
 app.post("/login", (req, res) => {
-  res.cookie('email', req.body.email);
-  res.redirect("/urls");
-});
+
+  let checkUser = getUserByEmail(req.body.email);
+  if (checkUser === null) {
+    res.sendStatus(406);
+  } else {
+    if (checkUser.email === req.body.email && checkUser.password === req.body.password) {
+      res.cookie('id', checkUser.id);
+      res.redirect("/urls");
+    } else {
+      res.sendStatus(406);
+    }
+  }
+  });
 
 // User Log out
 app.post('/logout', (req, res) => {
@@ -117,33 +137,26 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
-// user lookup helper function
-const getUserByEmail = (email) => {
-  for (const id in userDatabase) {
-    if (userDatabase[id].email === email) {
-      return true;
-    }
-  }
-  return null;
-};
 
-// Registration form data handler
-app.post('/register', (req, res) => {
-  if (req.body.email === '' || req.body.password === '') {
-    res.clearCookie('email');
-    res.sendStatus(406);
-  } else if (getUserByEmail(email)) {
-    res.statusCode = 400;
-    res.send('Email is already registered');
+
+app.post("/register", (req, res) => {
+  
+  if (getUserByEmail(req.body.email) !== null) {
+    res.sendStatus(400);
   } else {
-    let userID = String(generateRandomString());
-    userDatabase[String(userID)] = {
-      id: userID,
-      email: req.body.email,
-      password: req.body.password};
-    res.cookie('id', userID);
-    res.redirect("/urls");
-    console.log(userDatabase);
+    if (req.body.email === '' || req.body.password === '') {
+      res.clearCookie('email');
+      res.sendStatus(400);
+    } 
+    else {
+      let userID = String(generateRandomString());
+      userDatabase[String(userID)] = {
+        id: userID,
+        email: req.body.email,
+        password: req.body.password};
+      res.cookie('id', userID);
+      res.redirect("/urls");
+    }
   }
 });
 
