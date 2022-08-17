@@ -18,11 +18,11 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if (!id) { %>
+    <% if (!user_id) { %>
       <a class="nav-item nav-link" href="/register">Register</a>
       <a class="nav-item nav-link" href="/login">Login</a>
     <% } else { %>
-    <a>Logged in as: <strong><%=id.email%></strong>!&nbsp;
+    <a>Logged in as: <strong><%=user_id.email%></strong>!&nbsp;
       <form class="form-inline" action="/logout" method="POST">
         <button type="submit" class="btn btn-outline-dark">Logout</button> 
       </a>
