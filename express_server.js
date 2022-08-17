@@ -4,47 +4,23 @@ const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
 
+// EJS template
 app.set("view engine", "ejs");
 
-const generateRandomString = () => {
-  return Math.random().toString(36).slice(2).substring(0,6);
-};
+// helper functions
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
 
 // users database
-const userDatabase = {
+const userDatabase = {};
 
-};
-
-const urlDatabase = {
- 
-};
+// URL database
+const urlDatabase = {};
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
   keys: ["some-long-secret"],
 }));
-
-const getUserByEmail = (email) => {
-  for (const user_id in userDatabase) {
-    if (userDatabase[user_id].email === email) {
-      return userDatabase[user_id];
-    }
-  }
-  return null;
-};
-
-const urlsForUser = (id) => {
-  const keys = Object.keys(urlDatabase);
-  let userURLs = {};
-
-  for (const key of keys) {
-    if (urlDatabase[key].userID === id) {
-      userURLs[key] = urlDatabase[key];
-    }
-  }
-  return userURLs;
-};
 
 // ROUTING
 app.get("/", (req, res) => {
@@ -53,21 +29,21 @@ app.get("/", (req, res) => {
 
 // registration page
 app.get('/register', (req, res) => {
-  if (req.session['user_id']) {
+  if (req.session.user_id) {
     return res.redirect('/urls');
   }
   const templateVars = {
-    user_id: userDatabase[req.session['user_id']]
+    user_id: userDatabase[req.session.user_id]
   };
   res.render('register', templateVars);
 });
 
 app.get('/login', (req, res) => {
-  if (req.session['user_id']) {
+  if (req.session.user_id) {
     return res.redirect('/urls');
   }
   const templateVars = {
-    user_id: userDatabase[req.session['user_id']],
+    user_id: userDatabase[req.session.user_id],
     urls: urlDatabase
   };
   res.render("login", templateVars);
@@ -75,20 +51,21 @@ app.get('/login', (req, res) => {
 
 // Displays our urls from the urlDatabase by using the urls_index template
 app.get("/urls", (req, res) => {
-  const userURLS = urlsForUser(req.session.user_id);
+  const user_id = req.session.user_id;
+  const userURLS = urlsForUser(user_id, urlDatabase);
   const templateVars = {
     urls: userURLS,
-    user_id: userDatabase[req.session['user_id']],
+    user_id: userDatabase[req.session.user_id],
   };
   res.render("urls_index", templateVars);
 });
 
 // Render a new website URL and displays it with the urls_new template
 app.get("/urls/new", (req, res) => {
-  if (req.session['user_id']) {
+  if (req.session.user_id) {
     const templateVars = {
       urls: urlDatabase,
-      user_id: userDatabase[req.session["user_id"]]
+      user_id: userDatabase[req.session.user_id]
     };
     res.render("urls_new", templateVars);
   } else {
@@ -102,7 +79,7 @@ app.get("/urls/:id", (req, res) => {
     const templateVars = {
       URLid: req.params.id,
       longURL: urlDatabase[req.params.id].longURL,
-      user_id: userDatabase[req.session['user_id']]
+      user_id: userDatabase[req.session.user_id]
     };
   
     // only URLs that belongs to current user
@@ -167,7 +144,7 @@ app.post("/urls/:id/", (req, res) => {
 
 // User login functionality
 app.post("/login", (req, res) => {
-  const userCheck = getUserByEmail(req.body.email);
+  const userCheck = getUserByEmail(req.body.email, userDatabase);
   if (!userCheck) {
     res.sendStatus(404);
   } else {
@@ -188,7 +165,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  if (getUserByEmail(req.body.email)) {
+  if (getUserByEmail(req.body.email, urlDatabase)) {
     res.sendStatus(400);
   } else {
     if (req.body.email === '' || req.body.password === '') {
