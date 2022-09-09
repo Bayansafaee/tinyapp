@@ -81,7 +81,7 @@ app.get("/urls/:id", (req, res) => {
       longURL: urlDatabase[req.params.id].longURL,
       user_id: userDatabase[req.session.user_id]
     };
-  
+
     // only URLs that belongs to current user
     if (urlDatabase[req.params.id].userID === req.session.user_id) {
       res.render("urls_show", templateVars);
@@ -127,18 +127,26 @@ app.post("/urls", (req, res) => {
 
 // delete entry from database
 app.post("/urls/:id/delete", (req, res) => {
-  if (urlDatabase[req.params.id].userID !== req.session.user_id) {
-    res.status(401).send('Must be logged in to delete.\n');
-  } else {
-    delete urlDatabase[req.params.id];
-    res.redirect("/urls");
+  if (!req.session.user_id) {
+    return res.status(400).send('Must login to delete URLs.\n');
   }
+  if (urlDatabase[req.params.id].userID !== req.session.user_id) {
+    return res.status(401).send('Must be owner to delete.\n');
+  }
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+
 });
 
 // edit request
 app.post("/urls/:id/", (req, res) => {
+  if (!req.session.user_id) {
+    return res.status(400).send('Must login to update URLs.\n');
+  }
+  if (urlDatabase[req.params.id].userID !== req.session.user_id) {
+    return res.status(401).send('Must be owner to delete.\n');
+  }
   urlDatabase[req.params.id].longURL = req.body.longURL;
-  urlDatabase[req.params.id].userID = req.session.user_id;
   res.redirect("/urls");
 });
 
