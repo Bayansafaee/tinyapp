@@ -173,7 +173,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  if (getUserByEmail(req.body.email, urlDatabase)) {
+  if (getUserByEmail(req.body.email, userDatabase)) {
     res.sendStatus(400);
   } else {
     if (req.body.email === '' || req.body.password === '') {
